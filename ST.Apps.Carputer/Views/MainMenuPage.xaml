@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:hlv="clr-namespace:HorizontalList;assembly=HorizontalList"
+            xmlns:behaviors="clr-namespace:Behaviors;assembly=Behaviors"
+             xmlns:sync="using:
+            x:Class="ST.Apps.Carputer.Views.MainMenuPage">
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition Height="300"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <sync:SfListView
+                SelectionBackgroundColor="Transparent" Grid.Row="1" ItemSpacing="5,0" ItemsSource="{Binding MainMenuItems}" 
+                Orientation="Horizontal" WidthRequest="650" HorizontalOptions="Center" ItemSize="120" 
+                x:Name="lv"
+                ItemTapped="SfListView_OnItemTapped" >
+                <!--
+                <sync:SfListView.Behaviors>
+                    <behaviors:EventHandlerBehavior>
+                        <behaviors:EventHandlerBehavior EventName="ItemTapped">
+                            <behaviors:InvokeCommandAction Command="{Binding ItemTapped}" Converter=""></behaviors:InvokeCommandAction>
+                        </behaviors:EventHandlerBehavior>
+                    </behaviors:EventHandlerBehavior>
+                    
+                </sync:SfListView.Behaviors>
+                -->
+                
+                <sync:SfListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition Height="20" />
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Image Source="{Binding ImageSource}" Grid.Row="0" VerticalOptions="Center" HorizontalOptions="Center" />
+                            <Label Text="{Binding Title}" Grid.Row="1" HorizontalOptions="Center"></Label>
+                        </Grid>
+                    </DataTemplate>
+                </sync:SfListView.ItemTemplate>
+            </sync:SfListView>
+        </Grid>
+        <!--
+        <hlv:HorizontalListView ListOrientation="Horizontal" ItemsSource="{Binding MainMenuItems, Mode=TwoWay}" x:Name="lv" >
+            <hlv:HorizontalListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                            <Label Text="{Binding Title}"></Label>
+                    </ViewCell>
+                </DataTemplate>
+            </hlv:HorizontalListView.ItemTemplate>
+        </hlv:HorizontalListView>
+        -->
+<!--
+        <ListView x:Name="lv" ItemsSource="{Binding MainMenuItems, Mode=TwoWay}" >
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                            <StackLayout>
+                                <Image Source="{Binding ImageSource}"></Image>
+                                <Label Text="{Binding Title}"></Label>
+                            </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        -->
+    </Grid>
+</ContentPage>

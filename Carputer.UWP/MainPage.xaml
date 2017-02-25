@@ -1,0 +1,25 @@
+﻿<Page
+    x:Class="Carputer.UWP.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Carputer.UWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:maps="using:Windows.UI.Xaml.Controls.Maps"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="91*"/>
+            <ColumnDefinition Width="269*"/>
+        </Grid.ColumnDefinitions>
+        <maps:MapControl x:Name="map"
+            MapServiceToken="1b0g56SgAhxMKRAX1ZEF~I5BDGZytoJiuau7Jr7-1yA~Ah3nb5yUWyC5IQOyQFtsTuPX_6ewbzOv433FRnFNibNzuPtcj3KOouWMkYZjZJlp"
+            ZoomLevel="18" Grid.ColumnSpan="2" 
+            />
+
+        <Grid x:Name="grid" IsHitTestVisible="False" Tapped="Grid_OnTapped" Grid.ColumnSpan="2"/>
+
+        <Grid HorizontalAlignment="Left" Width="50" Background="#00000000"  x:Name="gLeft"></Grid>
+    </Grid>
+</Page>
