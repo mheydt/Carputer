@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2DA266B2-1F42-42AC-B165-59D59E5C3601}</ProjectGuid>
+    <ProjectGuid>{57DC101E-C193-4541-9439-DFE2F07B671B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ST.Fx.Gps.NMEA.UWP</RootNamespace>
-    <AssemblyName>ST.Fx.Gps.NMEA.UWP</AssemblyName>
+    <RootNamespace>ST.Fx.OBDII.Wifi.UWP</RootNamespace>
+    <AssemblyName>ST.Fx.OBDII.Wifi.UWP</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
@@ -107,22 +107,13 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PiUartGpsDevice.cs" />
-    <Compile Include="UwpNmeaGpsService.cs" />
+    <Compile Include="OBDIIService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Properties\ST.Fx.Gps.NMEA.UWP.rd.xml" />
+    <EmbeddedResource Include="Properties\ST.Fx.OBDII.Wifi.UWP.rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ST.Fx.Gps.NMEA.Model\ST.Fx.Gps.NMEA.Model.csproj">
-      <Project>{4dc693d0-7741-4f72-94de-e2ffa9ac3b27}</Project>
-      <Name>ST.Fx.Gps.NMEA.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ST.Fx.Gps.NMEA\ST.Fx.Gps.NMEA.csproj">
-      <Project>{7f6ab514-458c-4c41-afa5-70c7e78f36ef}</Project>
-      <Name>ST.Fx.Gps.NMEA</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ST.Fx.OBDII.Core\ST.Fx.OBDII.Core.csproj">
-      <Project>{8bbdc4d3-5562-4d61-866a-fc2325081a7f}</Project>
+      <Project>{8BBDC4D3-5562-4D61-866A-FC2325081A7F}</Project>
       <Name>ST.Fx.OBDII.Core</Name>
     </ProjectReference>
   </ItemGroup>
