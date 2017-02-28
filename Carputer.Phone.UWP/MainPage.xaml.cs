@@ -72,6 +72,7 @@ namespace Carputer.Phone.UWP
             };
             _timer.Tick += _timer_Tick;
             _timer.Start();
+
             getData();
         }
 
@@ -100,19 +101,19 @@ namespace Carputer.Phone.UWP
         {
             this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(() =>
             {
-                _model.Traces.Insert(0, msg);
+                 _model.Traces.Insert(0, msg);
             }));
         }
 
         private async void btnConnect_Click(object sender, RoutedEventArgs e)
         {
-            await _obd2.DisconnectAsync();
+            await _obd2.ShutdownAsync();
             await _obd2.InitAsync();
         }
 
         private async void btnDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            await _obd2.DisconnectAsync();
+            await _obd2.ShutdownAsync();
         }
     }
 }

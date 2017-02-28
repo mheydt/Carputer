@@ -8,8 +8,8 @@ namespace ST.Fx.OBDII.Core
 {
     public interface IOBDIIService
     {
-        Task<bool> InitAsync(bool simulatormode = false);
-        Task DisconnectAsync();
+        Task InitAsync(bool simulatormode = false);
+        Task ShutdownAsync();
 
     }
 }
