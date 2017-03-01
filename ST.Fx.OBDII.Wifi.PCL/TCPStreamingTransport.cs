@@ -55,10 +55,18 @@ namespace ST.Fx.OBDII.Wifi.PCL
 
         public async Task<string> ReadAsync(CancellationToken token = default(CancellationToken))
         {
-            var bytes = await _client.ReadStream.ReadAsync(_buffer, 0, _buffer.Length, token);
-            var str = Encoding.UTF8.GetString(_buffer, 0, bytes);
-            Tracer.writeLine($"ReadAsync: [{str.Length}] " + str);
-            return str;
+            try
+            {
+                var bytes = await _client.ReadStream.ReadAsync(_buffer, 0, _buffer.Length, token);
+                var str = Encoding.UTF8.GetString(_buffer, 0, bytes);
+                Tracer.writeLine($"ReadAsync: [{str.Length}] " + str);
+                return str;
+            }
+            catch (Exception ex)
+            {
+                Tracer.writeLine("Exception reading: " + ex.Message);
+                throw;
+            }
         }
 
         public async Task<bool> WriteAsync(string data, CancellationToken token = default(CancellationToken))
