@@ -62,6 +62,9 @@ namespace Carputer.Phone.UWP
         {
             Tracer.addListener(trace);
 
+            var sim = new SimWifiObdII(35000);
+            await sim.InitializeAsync();
+
             await _obd2.InitAsync(true);
 
             DataContext = _model;
