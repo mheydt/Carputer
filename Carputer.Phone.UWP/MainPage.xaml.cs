@@ -62,7 +62,7 @@ namespace Carputer.Phone.UWP
         {
             Tracer.addListener(trace);
 
-            await _obd2.InitAsync(true);
+            await _obd2.InitAsync();
 
             DataContext = _model;
 

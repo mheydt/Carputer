@@ -48,7 +48,7 @@ namespace ST.Fx.OBDII
             _simulatorMode = simulatormode;
 
             _cts = new CancellationTokenSource();
-            _processTask = Task.Run(() => processAsync(_cts.Token));
+            _processTask = Task.Run(async () => await processAsync(_cts.Token));
         }
 
         public async Task ShutdownAsync()
@@ -78,18 +78,14 @@ namespace ST.Fx.OBDII
                 {
                     if (_simulatorMode)
                     {
-                        pollDevice(token);
+                        await pollDevice(token);
                     }
                     else
                     {
                         var connected = await connectAsync(token);
                         if (connected)
                         {
-                            pollDevice(token);
-                        }
-                        if (!token.IsCancellationRequested)
-                        {
-                            Task.Delay(TimeSpan.FromMilliseconds(_connectionAttemptInterval), token).Wait(token);
+                            await pollDevice(token);
                         }
                     }
                 }
@@ -134,7 +130,7 @@ namespace ST.Fx.OBDII
             return true;
         }
 
-        private void pollDevice(CancellationToken token)
+        private async Task pollDevice(CancellationToken token)
         {
             Tracer.writeLine("Starting to poll device");
 
@@ -148,9 +144,15 @@ namespace ST.Fx.OBDII
 
                     try
                     {
-                        var s = (_simulatorMode) ?
-                            ObdUtils.GetEmulatorValue(cmd) :
-                            executeAsync(cmd, token).Result;
+                        var s = "";
+                        if (_simulatorMode)
+                        {
+                            s = ObdUtils.GetEmulatorValue(cmd);
+                        }
+                        else
+                        {
+                            s = await executeAsync(cmd, token);
+                        }
 
                         if (s != "ERROR")
                         {
@@ -177,13 +179,22 @@ namespace ST.Fx.OBDII
 
         private async Task<string> executeAsync(string command, CancellationToken token = default(CancellationToken))
         {
-            if (!await _transport.WriteAsync(command + "\r", token)) throw new Exception("Error executing command: " + command);
+            try
+            {
+                if (!await _transport.WriteAsync(command + "\r", token)) throw new Exception("Error executing command: " + command);
 
-            Task.Delay(100, token).Wait(token);
+                await Task.Delay(100, token);
 
-            var reply = await readResponseAsync(command, token);
+                var reply = await readResponseAsync(command, token);
 
-            return reply;
+                return reply;
+            }
+            catch (Exception ex)
+            {
+                Tracer.writeLine("Exception in executeAsync: " + ex.Message);
+                throw;
+            }
+
         }
 
         private async Task<string> readResponseAsync(string command = "", CancellationToken token = default(CancellationToken))
