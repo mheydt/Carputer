@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sockets.Plugin.Abstractions;
 
 namespace Carputer.Phone.UWP
 {
     public class SimWifiObdII
     {
         private int _port;
-        private TcpSocketClient _client;
+        private TcpSocketListener _listener;
 
         public SimWifiObdII(int port)
         {
@@ -20,39 +21,73 @@ namespace Carputer.Phone.UWP
 
         public async Task InitializeAsync()
         {
-            _client = new TcpSocketClient();
-            await _client.ConnectAsync("127.0.0.1", _port);
-
-            Task.Run(async () => readStream());
+            _listener = new TcpSocketListener();
+            _listener.ConnectionReceived += _listener_ConnectionReceived;
+            await _listener.StartListeningAsync(_port);
         }
 
-        private async Task readStream()
+        private async void _listener_ConnectionReceived(object sender, Sockets.Plugin.Abstractions.TcpSocketListenerConnectEventArgs args)
         {
-            var buffer = new byte[20 * 1024];
+            Tracer.writeLine($"Connect Received");
 
-            while (true)
+            var buffer = new byte[2048];
+            var bytesRead = -1;
+            while (bytesRead != 0)
             {
-                var count = _client.ReadStream.Read(buffer, 0, buffer.Length);
-                var data = Encoding.UTF8.GetString(buffer);
+                bytesRead = await args.SocketClient.ReadStream.ReadAsync(buffer, 0, buffer.Length);
 
-                Tracer.writeLine(data);
+                Tracer.writeLine("Bytes read: " + bytesRead);
 
-                var response = "";
-                switch (data)
+                if (bytesRead > 0)
                 {
-                    case "ATZ\r":
-                    case "ATE0\r":
-                    case "ATL1\r":
-                    case "ATSP00\r":
-                        response = "OK>";
-                        break;
+                    var data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+
+                    Tracer.writeLine("OBDII Sim Read: " + data);
+
+                    var response = "";
+                    switch (data)
+                    {
+                        case "ATZ\r":
+                        case "ATE0\r":
+                        case "ATL1\r":
+                        case "ATSP00\r":
+                            response = "OK>";
+                            break;
+
+                        case "0902\r":
+                            processVinRequest(args);
+                            return;
+
+                        case "010C\r":
+                            response = "01 0C 00 00";
+                            break;
+                    }
+
+                    Tracer.writeLine("sending response");
+
+                    await sendAsync(response, args);
+
+                    Tracer.writeLine("sent response");
                 }
-
-                Tracer.writeLine("Response: " + response);
-
-                var bytes = Encoding.UTF8.GetBytes(response);
-                _client.WriteStream.Write(bytes, 0, bytes.Length);
             }
+
+            Tracer.writeLine("listener out");
+        }
+
+        private async Task processVinRequest(TcpSocketListenerConnectEventArgs args)
+        {
+            sendAsync("SEARCHING...\r", args)
+                .ContinueWith(_ => sendAsync("49 02 01 00 00 00 00 49 02 02 00 00 00 00 49 02 03 00 00 00 00 49 02 04 00 00 00 00 49 02 05 00 00 00 00\r>", args));
+        }
+
+        private async Task sendAsync(string msg, TcpSocketListenerConnectEventArgs args)
+        {
+            Tracer.writeLine("Responding with: " + msg);
+
+            var bytes = Encoding.UTF8.GetBytes(msg);
+            await args.SocketClient.WriteStream.WriteAsync(bytes, 0, bytes.Length);
+            args.SocketClient.WriteStream.Flush();
+            Tracer.writeLine("replied");
         }
     }
 }

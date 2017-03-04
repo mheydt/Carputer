@@ -31,7 +31,8 @@ namespace Carputer.Phone.UWP
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private OBDIIService _obd2 = new OBDIIService(new TCPStreamingTransport("192.168.0.10", 35000));
+        //private OBDIIService _obd2 = new OBDIIService(new TCPStreamingTransport("127.0.0.1", 35000));
+        private OBDIIService _obd2 = new OBDIIService(new SocketTransport("127.0.0.1", 35000));
 
         [ImplementPropertyChanged]
         public class Model
@@ -65,7 +66,7 @@ namespace Carputer.Phone.UWP
             var sim = new SimWifiObdII(35000);
             await sim.InitializeAsync();
 
-            await _obd2.InitAsync(true);
+            await _obd2.InitAsync();
 
             DataContext = _model;
 
@@ -81,7 +82,7 @@ namespace Carputer.Phone.UWP
 
         private void _timer_Tick(object sender, object e)
         {
-            getData();
+            //getData();
             //trace($"tick {_count++}");
         }
 

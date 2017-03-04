@@ -75,7 +75,9 @@ namespace ST.Fx.OBDII.Wifi.PCL
             try
             {
                 var buffer = Encoding.UTF8.GetBytes(data);
+                Tracer.writeLine("about to write: " + data);
                 await _client.WriteStream.WriteAsync(buffer, 0, buffer.Length, token);
+                Tracer.writeLine("Before flush");
                 _client.WriteStream.Flush();
                 Tracer.writeLine("Wrote: " + data);
                 return true;
