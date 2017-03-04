@@ -200,10 +200,18 @@ namespace ST.Fx.OBDII
             Tracer.writeLine("Initializing OBD-II");
             // initialize the device
 
-            await _client.ExecuteCommand("ATZ");
-            await _client.ExecuteCommand("ATE0");
-            await _client.ExecuteCommand("ATL1");
-            await _client.ExecuteCommand("ATSP00");
+            try
+            {
+                await _client.ExecuteCommand("ATZ");
+                await _client.ExecuteCommand("ATE0");
+                await _client.ExecuteCommand("ATL1");
+                await _client.ExecuteCommand("ATSP00");
+
+            }
+            catch (Exception ex)
+            {
+
+            }
             //await executeAsync("ATZ", token);
             //await executeAsync("ATE0", token);
             //await executeAsync("ATL1", token);

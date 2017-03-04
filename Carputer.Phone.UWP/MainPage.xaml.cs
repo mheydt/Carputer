@@ -66,7 +66,7 @@ namespace Carputer.Phone.UWP
             var sim = new SimWifiObdII(35000);
             await sim.InitializeAsync();
 
-            await _obd2.InitAsync();
+            Task.Run(() => _obd2.InitAsync());
 
             DataContext = _model;
 
@@ -75,9 +75,9 @@ namespace Carputer.Phone.UWP
                 Interval = TimeSpan.FromSeconds(0.25)
             };
             _timer.Tick += _timer_Tick;
-            _timer.Start();
+            //_timer.Start();
 
-            getData();
+            //getData();
         }
 
         private void _timer_Tick(object sender, object e)

@@ -30,14 +30,21 @@ namespace App1
 
         public async Task InitAsync()
         {
-            _socket = new StreamSocket();
-            await _socket.ConnectAsync(new HostName("localhost"), "35000");
-            _istream = _socket.InputStream.AsStreamForRead();
-            _ostream = _socket.OutputStream.AsStreamForWrite();
-            _writer = new StreamWriter(_ostream);
-            _reader = new StreamReader(_istream);
+            try
+            {
+                _socket = new StreamSocket();
+                await _socket.ConnectAsync(new HostName("192.168.0.10"), "35000");
+                _istream = _socket.InputStream.AsStreamForRead();
+                _ostream = _socket.OutputStream.AsStreamForWrite();
+                _writer = new StreamWriter(_ostream);
+                _reader = new StreamReader(_istream);
 
-            _connected = true;
+                _connected = true;
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         public async Task ShutdownAsync()
@@ -55,7 +62,7 @@ namespace App1
 
         public async Task WriteAsync(string data)
         {
-            await _writer.WriteAsync(data);
+            await _writer.WriteAsync(data + "\r");
             await _writer.FlushAsync();
 
             Debug.WriteLine($"Wrote: {data}");
