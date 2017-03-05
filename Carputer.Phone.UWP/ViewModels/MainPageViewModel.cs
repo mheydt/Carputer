@@ -34,8 +34,17 @@ namespace Carputer.ViewModels
         {
         }
 
-        public void OnNext(OBDIIUpdate value)
+        public void OnNext(OBDIIUpdate update)
         {
+            if (update.Properties.ContainsKey("RPM"))
+            {
+                var rpmAsString = update.Properties["RPM"];
+                var rpm = 0.0;
+                if (double.TryParse(rpmAsString, out rpm))
+                {
+                    RPM = rpm;
+                }
+            }
         }
     }
 }

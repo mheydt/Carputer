@@ -141,6 +141,7 @@ namespace ST.Fx.OBDII
                             var s = await _transport.ExecuteCommand(cmd);
                             if (s != "ERROR")
                             {
+                                s = ObdUtils.ParseObd01Msg(s);
                                 Tracer.writeLine($"{key} {s}");
                                 update(key, s);
                             }
