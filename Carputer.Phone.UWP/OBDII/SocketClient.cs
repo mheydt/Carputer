@@ -5,13 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Sockets;
 
-namespace App1
+namespace Carputer.Phone.UWP.OBDII
 {
-    public class Client
+    public class SocketClient : IOBDIITransport
     {
         private StreamSocket _socket;
         private Stream _istream;
@@ -22,13 +23,12 @@ namespace App1
         private bool _connected;
         public bool Connected { get { return _connected; } }
 
-        public Client()
+        public SocketClient()
         {
             _connected = false;
         }
 
-
-        public async Task InitAsync()
+        public async Task<bool> InitAsync(CancellationToken cancellation = default(CancellationToken))
         {
             try
             {
@@ -40,27 +40,37 @@ namespace App1
                 _reader = new StreamReader(_istream);
 
                 _connected = true;
+
+                return true;
             }
             catch (Exception ex)
             {
-
+                
             }
+
+            return false;
         }
 
-        public async Task ShutdownAsync()
+        public async Task ShutdownAsync(CancellationToken cancellation = default(CancellationToken))
         {
-            _writer.Dispose();
-            _reader.Dispose();
-            _istream.Dispose();
-            _ostream.Dispose();
-            _socket.Dispose();
+            _writer?.Dispose();
+            _reader?.Dispose();
+            _istream?.Dispose();
+            _ostream?.Dispose();
+            _socket?.Dispose();
 
-            await Task.FromResult(true);
+            _writer = null;
+            _reader = null;
+            _istream = null;
+            _ostream = null;
+            _socket = null;
 
             _connected = false;
+
+            await Task.FromResult(true);
         }
 
-        public async Task WriteAsync(string data)
+        public async Task WriteAsync(string data, CancellationToken cancellation = default(CancellationToken))
         {
             await _writer.WriteAsync(data + "\r");
             await _writer.FlushAsync();
@@ -68,33 +78,29 @@ namespace App1
             Debug.WriteLine($"Wrote: {data}");
         }
 
-        public async Task<string> ReadAsync()
+        public async Task<string> ReadAsync(CancellationToken cancellation = default(CancellationToken))
         {
             Debug.WriteLine("ReadAsync in");
             var buffer = new byte[1024];
-            var count = await _istream.ReadAsync(buffer, 0, buffer.Length);
+            var count = await _istream.ReadAsync(buffer, 0, buffer.Length, cancellation);
             var data = Encoding.ASCII.GetString(buffer, 0, count);
             Debug.WriteLine($"{count} {data}");
             return data;
         }
 
-        public async Task<string> ExecuteCommand(string command, string terminator = ">")
+        public async Task<string> ExecuteCommand(string command, string terminator = ">", CancellationToken cancellation = default(CancellationToken))
         {
             Debug.WriteLine($"ExecuteCommand: {command}");
 
-            //var listenTask = listenForResponse(terminator);
-
-            await WriteAsync(command);
-            var response = await listenForResponse(terminator);
-
-            //var response = await listenTask;
+            await WriteAsync(command, cancellation);
+            var response = await listenForResponse(terminator, cancellation);
 
             Debug.WriteLine($"ExecuteCommand out: {response}");
 
             return response;
         }
 
-        private async Task<string> listenForResponse(string terminator)
+        private async Task<string> listenForResponse(string terminator, CancellationToken cancellation = default(CancellationToken))
         {
             Debug.WriteLine("listenForResponse in");
 
@@ -103,7 +109,7 @@ namespace App1
             while (true)
             {
                 Debug.WriteLine("Waiting for more data");
-                var r = await ReadAsync();
+                var r = await ReadAsync(cancellation);
                 Debug.WriteLine($"listenForResponse: Read: {r}");
 
                 r = r.Replace("SEARCHING...", "").Replace("\r\n", " ").Replace("\r", " ");

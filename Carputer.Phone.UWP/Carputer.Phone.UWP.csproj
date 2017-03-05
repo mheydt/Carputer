@@ -95,13 +95,18 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Client.cs" />
+    <Compile Include="OBDII\BluetoothClient.cs" />
+    <Compile Include="OBDII\IOBDIIServer.cs" />
+    <Compile Include="OBDII\IOBDIITransport.cs" />
+    <Compile Include="OBDII\NullOBDIIServer.cs" />
+    <Compile Include="OBDII\SimulatedClient.cs" />
+    <Compile Include="OBDII\SocketClient.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="OBDIIService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Server.cs" />
+    <Compile Include="OBDII\SocketServer.cs" />
     <Compile Include="SimWifiObdII.cs" />
     <Compile Include="SocketTransport.cs" />
   </ItemGroup>

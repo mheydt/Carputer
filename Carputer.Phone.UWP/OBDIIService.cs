@@ -1,4 +1,5 @@
 ﻿using App1;
+using Carputer.Phone.UWP.OBDII;
 using Sockets.Plugin;
 using ST.Fx.Debug.Tracer;
 using ST.Fx.OBDII.Core;
@@ -29,12 +30,17 @@ namespace ST.Fx.OBDII
         private int _connectionAttemptInterval = 5000;
         private Task _processTask;
 
-        private Client _client;
-        private Server _server;
+        private IOBDIITransport _client;
+        private IOBDIIServer _server;
+        private Func<IOBDIITransport> _transportFactory;
+        private Func<IOBDIIServer> _serverFactory;
 
-        public OBDIIService(IOBD2Transport transport)
+        public OBDIIService(
+            Func<IOBDIITransport> transportFactory,
+            Func<IOBDIIServer> serverFactory = null)
         {
-            _transport = transport;
+            _transportFactory = transportFactory;
+            _serverFactory = serverFactory;
 
             _pids = ObdUtils.GetPIDs();
             foreach (var v in _pids.Values)
@@ -43,102 +49,24 @@ namespace ST.Fx.OBDII
             }
         }
 
-        public async Task InitAsync(bool simulatormode = false)
+        public async Task InitAsync()
         {
             Tracer.writeLine("init");
 
             if (_cts != null) throw new Exception("Already running");
 
-            _simulatorMode = simulatormode;
-
-            /*
-            _cts = new CancellationTokenSource();
-
-            _state = new Dictionary<string, string>();
-
-            if (_simulatorMode)
-            {
-                _processTask = Task.Run(() => simulate(_cts.Token));
-            }
-            else
-            {
-                _processTask = Task.Run(() => startPollingDevice(_cts.Token));
-            }
-            */
-
-            _client = new Client();
-            //_server = new Server();
-
-            await _client.InitAsync();
-            //await _server.InitAsync();
+            _client = _transportFactory();
+            _server = _serverFactory == null ? new NullOBDIIServer() : _serverFactory();
 
             _cts = new CancellationTokenSource();
+
+            await _client.InitAsync(_cts.Token);
+            await _server.InitAsync(_cts.Token);
+
             _processTask = Task.Run(() => startPollingDevice(_cts.Token));
 
             Tracer.writeLine("init out");
         }
-
-        /*
-        Task.Run(() => executor());
-        }
-
-        private void executor()
-        {
-            connectAsync().Wait();
-            write("ATZ");
-            var r = read();
-            write("ATE0");
-            r = read();
-            write("ATL1");
-            r = read();
-            write("ATSP00");
-            r = read();
-
-            write("0902");
-            r = read();
-            //var t = getVIN();
-            //t.Wait();
-            //var vin = t.Result;
-            //_state["vin"] = vin;
-
-            Tracer.writeLine("done");
-        }
-        */
-        /*
-        private void write(string data)
-        {
-            _transport.WriteAsync(data + "\r").Wait();
-        }
-
-        private string read()
-        {
-            var t = _transport.ReadAsync();
-            t.Wait();
-            var data = t.Result;
-            return data;
-        }
-        */
-        /*
-
-            if (_cts != null) throw new Exception("Already running");
-
-            _simulatorMode = simulatormode;
-
-            _cts = new CancellationTokenSource();
-
-            _state = new Dictionary<string, string>();
-
-            if (_simulatorMode)
-            {
-                _processTask = Task.Run(() => simulate(_cts.Token));
-            }
-            else
-            {
-                _processTask = Task.Run(() => startPollingDevice(_cts.Token));
-            }
-            Tracer.writeLine("init out");
-        }
-        */
 
         public async Task ShutdownAsync()
         {
@@ -152,53 +80,21 @@ namespace ST.Fx.OBDII
             _cts = null;
             _processTask = null;
 
-            //await _transport.DisconnectAsync();
+            await _server.ShutdownAsync();
             await _client.ShutdownAsync();
 
             Tracer.writeLine("OBD-II has been taken down");
         }
 
-        private async void simulate(CancellationToken token)
-        {
-            await _server.InitAsync();
-
-            while (!token.IsCancellationRequested)
-            {
-                foreach (var cmd in _pids.Keys)
-                {
-                    if (token.IsCancellationRequested) break;
-
-                    var key = _pids[cmd];
-
-                    var s = ObdUtils.GetEmulatorValue(cmd);
-                    update(key, s);
-                }
-            }
-            await _server.ShutdownAsync();
-
-            Tracer.writeLine("simulate out");
-        }
-
         private async Task startPollingDevice(CancellationToken token)
         {
-            //await connectAsync(token);
             await initializeDeviceAsync(token);
             await pollDeviceAsync(token);
-        }
-
-        private async Task connectAsync(CancellationToken token = default(CancellationToken))
-        {
-            Tracer.writeLine("Attempting to connect");
-
-            //await _transport.ConnectAsync(token);
-
-            Tracer.writeLine("Connected");
         }
 
         private async Task initializeDeviceAsync(CancellationToken token)
         { 
             Tracer.writeLine("Initializing OBD-II");
-            // initialize the device
 
             try
             {
@@ -206,16 +102,11 @@ namespace ST.Fx.OBDII
                 await _client.ExecuteCommand("ATE0");
                 await _client.ExecuteCommand("ATL1");
                 await _client.ExecuteCommand("ATSP00");
-
             }
             catch (Exception ex)
             {
 
             }
-            //await executeAsync("ATZ", token);
-            //await executeAsync("ATE0", token);
-            //await executeAsync("ATL1", token);
-            //await executeAsync("ATSP00", token);
 
             var vin = await getVIN();
             _state["vin"] = vin;
@@ -239,9 +130,7 @@ namespace ST.Fx.OBDII
 
                         try
                         {
-                            //var s = await executeAsync(cmd, token);
                             var s = await _client.ExecuteCommand(cmd);
-
                             if (s != "ERROR")
                             {
                                 Tracer.writeLine($"{key} {s}");
@@ -270,48 +159,6 @@ namespace ST.Fx.OBDII
             Tracer.writeLine("polling of device ended");
         }
 
-        private async Task<string> executeAsync(string command, CancellationToken token = default(CancellationToken))
-        {
-            try
-            {
-                Tracer.writeLine("execute async 1 " + command);
-
-                await _transport.WriteAsync(command + "\r", token);
-                Tracer.writeLine("execute async 3: " + command);
-
-                Tracer.writeLine("Waiting for response");
-
-                var ret = await _transport.ReadAsync(token);
-
-                Tracer.writeLine("the response is: " + ret);
-
-                while (!ret.Trim().EndsWith(">"))
-                {
-                    var next = await _transport.ReadAsync(token);
-                    ret = ret + next;
-                }
-
-                ret = ret.Trim();
-                ret = ret.Replace("SEARCHING...", "").Replace("\r\n", " ").Replace("\r", " ");
-
-                if (ret.EndsWith(">")) ret = ret.Substring(0, ret.Length - 1);
-
-                if (ret.StartsWith(command))
-                {
-                    ret = ret.Substring(command.Length);
-                }
-
-                Tracer.writeLine("executeAsync reply is: " + ret);
-
-                return ret.Trim();
-            }
-            catch (Exception ex)
-            {
-                Tracer.writeLine("Exception in executeAsync: " + ex.Message);
-                throw;
-            }
-        }
-
         private async Task<string> getVIN(CancellationToken token = default(CancellationToken))
         {
             Tracer.writeLine("In getVIN");
@@ -323,20 +170,10 @@ namespace ST.Fx.OBDII
             }
 
             var result = await _client.ExecuteCommand("0902");
-                //await executeAsync("0902", token);
 
             if (result == "UNABLE TO CONNECT") throw new Exception("Unable to connect to ECN");
 
             if (!result.StartsWith("49")) throw new Exception("Could not connect / get VIN");
-
-            /*
-            Tracer.writeLine($"Started with 49 - reading more");
-            while (!result.Contains("49 02 05"))
-            {
-                string tmp = await _transport.ReadAsync(token);
-                result += tmp;
-            }
-            */
 
             Tracer.writeLine("getVIN calling parse: " + result);
             var vin = ObdUtils.ParseVINMsg(result);

@@ -1,4 +1,5 @@
-﻿using PropertyChanged;
+﻿using Carputer.Phone.UWP.OBDII;
+using PropertyChanged;
 using ST.Fx.Debug.Tracer;
 using ST.Fx.OBDII;
 using ST.Fx.OBDII;
@@ -32,7 +33,10 @@ namespace Carputer.Phone.UWP
     public sealed partial class MainPage : Page
     {
         //private OBDIIService _obd2 = new OBDIIService(new TCPStreamingTransport("127.0.0.1", 35000));
-        private OBDIIService _obd2 = new OBDIIService(new SocketTransport("127.0.0.1", 35000));
+        private OBDIIService _obd2 = new OBDIIService(
+            //new SocketTransport("127.0.0.1", 35000)
+            () => new SocketClient()
+            );
 
         [ImplementPropertyChanged]
         public class Model
