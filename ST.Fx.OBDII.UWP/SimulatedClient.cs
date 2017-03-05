@@ -1,12 +1,11 @@
-﻿using ST.Fx.OBDII.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Carputer.Phone.UWP.OBDII
+namespace ST.Fx.OBDII
 {
     public class SimulatedClient : IOBDIITransport
     {

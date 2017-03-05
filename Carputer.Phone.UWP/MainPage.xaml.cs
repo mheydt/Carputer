@@ -1,9 +1,7 @@
-﻿using Carputer.Phone.UWP.OBDII;
+﻿using Carputer.ViewModels;
 using PropertyChanged;
 using ST.Fx.Debug.Tracer;
 using ST.Fx.OBDII;
-using ST.Fx.OBDII;
-using ST.Fx.OBDII.Wifi.PCL;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,22 +30,7 @@ namespace Carputer.Phone.UWP
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        //private OBDIIService _obd2 = new OBDIIService(new TCPStreamingTransport("127.0.0.1", 35000));
-        private OBDIIService _obd2 = new OBDIIService(
-            //new SocketTransport("127.0.0.1", 35000)
-            () => new SocketClient()
-            );
-
-        [ImplementPropertyChanged]
-        public class Model
-        {
-            public ST.Fx.OBDII.Model OBDII { get; set; }
-            public ObservableCollection<string> Traces { get; set; } = new ObservableCollection<string>();
-            public string RPM { get; set; }
-        }
-
-        private Model _model = new Model();
-        private DispatcherTimer _timer;
+        private MainPageViewModel _viewModel;
 
         public MainPage()
         {
@@ -60,25 +43,18 @@ namespace Carputer.Phone.UWP
         private void MainPage_Unloaded(object sender, RoutedEventArgs e)
         {
             Tracer.removeListener(trace);
-            _timer.Stop();
         }
 
         private async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             Tracer.addListener(trace);
 
-            var sim = new SimWifiObdII(35000);
-            await sim.InitializeAsync();
+            //var sim = new SimWifiObdII(35000);
+            //await sim.InitializeAsync();]
 
-            Task.Run(() => _obd2.InitAsync());
+            _viewModel = TinyIoC.TinyIoCContainer.Current.Resolve<MainPageViewModel>();
+            DataContext = _viewModel;
 
-            DataContext = _model;
-
-            _timer = new DispatcherTimer()
-            {
-                Interval = TimeSpan.FromSeconds(0.25)
-            };
-            _timer.Tick += _timer_Tick;
             //_timer.Start();
 
             //getData();
@@ -90,6 +66,7 @@ namespace Carputer.Phone.UWP
             //trace($"tick {_count++}");
         }
 
+        /*
         private int _count = 0;
         private void getData()
         {
@@ -104,24 +81,25 @@ namespace Carputer.Phone.UWP
                 _model.RPM = "";
             }
         }
+        */
 
         private void trace(string msg)
         {
             this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(() =>
             {
-                 _model.Traces.Insert(0, msg);
+                 _viewModel.Traces.Insert(0, msg);
             }));
         }
 
         private async void btnConnect_Click(object sender, RoutedEventArgs e)
         {
-            await _obd2.ShutdownAsync();
-            await _obd2.InitAsync();
+            //await _obd2.ShutdownAsync();
+            //await _obd2.InitAsync();
         }
 
         private async void btnDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            await _obd2.ShutdownAsync();
+            //await _obd2.ShutdownAsync();
         }
     }
 }

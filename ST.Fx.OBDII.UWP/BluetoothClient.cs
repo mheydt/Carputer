@@ -1,4 +1,4 @@
-﻿using ST.Fx.OBDII.Core;
+﻿using ST.Fx.Debug.Tracer;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +11,7 @@ using Windows.Devices.Enumeration;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
-namespace Carputer.Phone.UWP.OBDII
+namespace ST.Fx.OBDII
 {
     public class BluetoothClient : IOBDIITransport
     {
@@ -53,7 +53,7 @@ namespace Carputer.Phone.UWP.OBDII
             catch (Exception ex)
             {
                 _connected = false;
-                System.Diagnostics.Debug.WriteLine("Connect:" + ex.Message);
+                Tracer.writeLine("Connect:" + ex.Message);
                 return false;
             }
 
@@ -61,7 +61,7 @@ namespace Carputer.Phone.UWP.OBDII
             if (_connected)
             {
                 var msg = String.Format("Connected to {0}!", _socket.Information.RemoteAddress.DisplayName);
-                Debug.WriteLine(msg);
+                Tracer.writeLine(msg);
 
                 _dataWriterObject = new DataWriter(_socket.OutputStream);
                 _dataReaderObject = new DataReader(_socket.InputStream);
@@ -88,7 +88,7 @@ namespace Carputer.Phone.UWP.OBDII
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(ex.Message);
+                    Tracer.writeLine(ex.Message);
                 }
                 _socket = null;
             }
@@ -96,27 +96,27 @@ namespace Carputer.Phone.UWP.OBDII
 
         public async Task<string> ExecuteCommand(string command, string terminator = ">", CancellationToken cancellation = default(CancellationToken))
         {
-            Debug.WriteLine($"ExecuteCommand: {command}");
+            Tracer.writeLine($"ExecuteCommand: {command}");
 
             await WriteAsync(command, cancellation);
             var response = await listenForResponse(terminator, cancellation);
 
-            Debug.WriteLine($"ExecuteCommand out: {response}");
+            Tracer.writeLine($"ExecuteCommand out: {response}");
 
             return response;
         }
 
         private async Task<string> listenForResponse(string terminator = ">", CancellationToken cancellation = default(CancellationToken))
         {
-            Debug.WriteLine("listenForResponse in");
+            Tracer.writeLine("listenForResponse in");
 
             var response = "";
 
             while (true)
             {
-                Debug.WriteLine("Waiting for more data");
+                Tracer.writeLine("Waiting for more data");
                 var r = await ReadAsync(terminator, cancellation);
-                Debug.WriteLine($"listenForResponse: Read: {r}");
+                Tracer.writeLine($"listenForResponse: Read: {r}");
 
                 r = r.Replace("SEARCHING...", "").Replace("\r\n", " ").Replace("\r", " ");
 
@@ -126,7 +126,7 @@ namespace Carputer.Phone.UWP.OBDII
                 if (r.EndsWith(terminator)) break;
             }
 
-            Debug.WriteLine("listenForResponse out: " + response);
+            Tracer.writeLine("listenForResponse out: " + response);
 
             return response;
         }
@@ -143,7 +143,7 @@ namespace Carputer.Phone.UWP.OBDII
                 var statusText = msg + ", ";
                 statusText += bytesWritten.ToString();
                 statusText += " bytes written successfully!";
-                Debug.WriteLine(statusText);
+                Tracer.writeLine(statusText);
             }
         }
 
@@ -172,12 +172,12 @@ namespace Carputer.Phone.UWP.OBDII
                 try
                 {
                     var recvdtxt = _dataReaderObject.ReadString(bytesRead);
-                    Debug.WriteLine(recvdtxt);
+                    Tracer.writeLine(recvdtxt);
                     return recvdtxt;
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("ReadAsync: " + ex.Message);
+                    Tracer.writeLine("ReadAsync: " + ex.Message);
                     return "";
                 }
             }

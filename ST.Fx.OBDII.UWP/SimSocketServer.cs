@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ST.Fx.Debug.Tracer;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,9 +10,9 @@ using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
-namespace App1
+namespace ST.Fx.OBDII
 {
-    public class Server
+    public class SimSocketServer
     {
         private StreamSocketListener _listener;
         private List<CancellationTokenSource> _activeConnectionTokens = new List<CancellationTokenSource>();
@@ -22,7 +23,7 @@ namespace App1
             _listener = new StreamSocketListener();
             _listener.ConnectionReceived += _listener_ConnectionReceived;
             await _listener.BindServiceNameAsync("35000");
-            Debug.WriteLine("Server listening");
+            Tracer.writeLine("Server listening");
         }
 
         public async Task ShutdownAsync()
@@ -33,7 +34,7 @@ namespace App1
 
         private async void _listener_ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
         {
-            Debug.WriteLine("Server got connection");
+            Tracer.writeLine("Server got connection");
             var task = doListen(args);
             _tasks.Add(task);
         }
@@ -56,13 +57,13 @@ namespace App1
                 var bytes = await istream.ReadAsync(buffer, 0, buffer.Length);
                 if (bytes == 0)
                 {
-                    Debug.WriteLine("Connection closed");
+                    Tracer.writeLine("Connection closed");
                     break;
                 }
 
                 var data = Encoding.ASCII.GetString(buffer, 0, bytes);
 
-                Debug.WriteLine($"Read: {bytes} {data}");
+                Tracer.writeLine($"Read: {bytes} {data}");
 
                 await process(data, writer);
             }
@@ -70,7 +71,7 @@ namespace App1
             istream.Dispose();
             ostream.Dispose();
 
-            Debug.WriteLine("Exiting listener");
+            Tracer.writeLine("Exiting listener");
         }
 
         private async Task process(string data, StreamWriter writer)

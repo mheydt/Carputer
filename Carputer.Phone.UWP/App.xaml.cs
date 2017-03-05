@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Carputer.Services;
+using ST.Fx.OBDII;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using TinyIoC;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -51,6 +54,15 @@ namespace Carputer.Phone.UWP
             // just ensure that the window is active
             if (rootFrame == null)
             {
+                TinyIoCContainer.Current.Register<IAppServices, AppServices>().AsSingleton();
+                TinyIoCContainer.Current.Register<IOBDIIService, OBDIIService>().AsSingleton();
+                TinyIoCContainer.Current.Register<IOBDIIDataProcessor, OBDIIDataProcessor>().AsSingleton();
+                TinyIoCContainer.Current.Register<IOBDIITransport, SocketClientTransport>().AsSingleton();
+                TinyIoCContainer.Current.Register<IOBDIIServer, NullOBDIIServer>().AsSingleton();
+
+                var services = TinyIoCContainer.Current.Resolve<IAppServices>();
+                services.InitializeAsync();
+
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
 

@@ -1,8 +1,4 @@
-﻿using App1;
-using Carputer.Phone.UWP.OBDII;
-using Sockets.Plugin;
-using ST.Fx.Debug.Tracer;
-using ST.Fx.OBDII.Core;
+﻿using ST.Fx.Debug.Tracer;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,31 +12,46 @@ using System.Threading.Tasks;
 
 namespace ST.Fx.OBDII
 {
-    public class OBDIIService : IOBDIIService
+    public class OBDIIService : IOBDIIService, IObservable<OBDIIUpdate>
     {
+        public class Unsubscriber : IDisposable
+        {
+            private IObserver<OBDIIUpdate> _observer;
+            private List<IObserver<OBDIIUpdate>> _observers;
+
+            public Unsubscriber(List<IObserver<OBDIIUpdate>> observers, IObserver<OBDIIUpdate> observer)
+            {
+                _observers = observers;
+                _observer = observer;
+            }
+            public void Dispose()
+            {
+                if (!(_observer == null)) _observers.Remove(_observer);
+            }
+        }
+
+        private List<IObserver<OBDIIUpdate>> _observers = new List<IObserver<OBDIIUpdate>>();
+
         private Dictionary<string, string> _state = new Dictionary<string, string>();
         private CancellationTokenSource _cts;
         const string _defaultValue = "-255";
         private Dictionary<string, string> _pids;
         private bool _simulatorMode = false;
-        private IOBD2Transport _transport;
         private int _pollInterval = 5000;
         private object _lock = new object();
         private Task _connectTask = null;
         private int _connectionAttemptInterval = 5000;
         private Task _processTask;
 
-        private IOBDIITransport _client;
+        private IOBDIITransport _transport;
         private IOBDIIServer _server;
-        private Func<IOBDIITransport> _transportFactory;
-        private Func<IOBDIIServer> _serverFactory;
 
         public OBDIIService(
-            Func<IOBDIITransport> transportFactory,
-            Func<IOBDIIServer> serverFactory = null)
+            IOBDIITransport transport,
+            IOBDIIServer server)
         {
-            _transportFactory = transportFactory;
-            _serverFactory = serverFactory;
+            _transport = transport;
+            _server = server;
 
             _pids = ObdUtils.GetPIDs();
             foreach (var v in _pids.Values)
@@ -55,12 +66,9 @@ namespace ST.Fx.OBDII
 
             if (_cts != null) throw new Exception("Already running");
 
-            _client = _transportFactory();
-            _server = _serverFactory == null ? new NullOBDIIServer() : _serverFactory();
-
             _cts = new CancellationTokenSource();
 
-            await _client.InitAsync(_cts.Token);
+            await _transport.InitAsync(_cts.Token);
             await _server.InitAsync(_cts.Token);
 
             _processTask = Task.Run(() => startPollingDevice(_cts.Token));
@@ -81,7 +89,7 @@ namespace ST.Fx.OBDII
             _processTask = null;
 
             await _server.ShutdownAsync();
-            await _client.ShutdownAsync();
+            await _transport.ShutdownAsync();
 
             Tracer.writeLine("OBD-II has been taken down");
         }
@@ -98,10 +106,10 @@ namespace ST.Fx.OBDII
 
             try
             {
-                await _client.ExecuteCommand("ATZ");
-                await _client.ExecuteCommand("ATE0");
-                await _client.ExecuteCommand("ATL1");
-                await _client.ExecuteCommand("ATSP00");
+                await _transport.ExecuteCommand("ATZ");
+                await _transport.ExecuteCommand("ATE0");
+                await _transport.ExecuteCommand("ATL1");
+                await _transport.ExecuteCommand("ATSP00");
             }
             catch (Exception ex)
             {
@@ -130,7 +138,7 @@ namespace ST.Fx.OBDII
 
                         try
                         {
-                            var s = await _client.ExecuteCommand(cmd);
+                            var s = await _transport.ExecuteCommand(cmd);
                             if (s != "ERROR")
                             {
                                 Tracer.writeLine($"{key} {s}");
@@ -169,7 +177,7 @@ namespace ST.Fx.OBDII
                 return _state["vin"];
             }
 
-            var result = await _client.ExecuteCommand("0902");
+            var result = await _transport.ExecuteCommand("0902");
 
             if (result == "UNABLE TO CONNECT") throw new Exception("Unable to connect to ECN");
 
@@ -187,12 +195,20 @@ namespace ST.Fx.OBDII
 
         private void update(string key, string value)
         {
-            lock (_lock)
+            _state[key] = value;
+        }
+
+        private void notify()
+        {
+            var update = new OBDIIUpdate(_state);
+
+            foreach (var observer in _observers)
             {
-                _state[key] = value;
+                observer.OnNext(update);
             }
         }
 
+        /*
         public Dictionary<string, string> GetState()
         {
             if (!_simulatorMode && _cts == null)
@@ -211,6 +227,14 @@ namespace ST.Fx.OBDII
             }
 
             return ret;
+        }
+        */
+
+        public IDisposable Subscribe(IObserver<OBDIIUpdate> observer)
+        {
+            if (!_observers.Contains(observer))
+                _observers.Add(observer);
+            return new Unsubscriber(_observers, observer);
         }
     }
 }

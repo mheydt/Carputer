@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Carputer.Phone.UWP.OBDII
+namespace ST.Fx.OBDII
 {
     public class NullOBDIIServer : IOBDIIServer
     {

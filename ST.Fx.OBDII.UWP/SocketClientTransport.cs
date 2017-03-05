@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ST.Fx.Debug.Tracer;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,9 +11,9 @@ using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Sockets;
 
-namespace Carputer.Phone.UWP.OBDII
+namespace ST.Fx.OBDII
 {
-    public class SocketClient : IOBDIITransport
+    public class SocketClientTransport : IOBDIITransport
     {
         private StreamSocket _socket;
         private Stream _istream;
@@ -23,7 +24,7 @@ namespace Carputer.Phone.UWP.OBDII
         private bool _connected;
         public bool Connected { get { return _connected; } }
 
-        public SocketClient()
+        public SocketClientTransport()
         {
             _connected = false;
         }
@@ -75,42 +76,42 @@ namespace Carputer.Phone.UWP.OBDII
             await _writer.WriteAsync(data + "\r");
             await _writer.FlushAsync();
 
-            Debug.WriteLine($"Wrote: {data}");
+            Tracer.writeLine($"Wrote: {data}");
         }
 
         public async Task<string> ReadAsync(CancellationToken cancellation = default(CancellationToken))
         {
-            Debug.WriteLine("ReadAsync in");
+            Tracer.writeLine("ReadAsync in");
             var buffer = new byte[1024];
             var count = await _istream.ReadAsync(buffer, 0, buffer.Length, cancellation);
             var data = Encoding.ASCII.GetString(buffer, 0, count);
-            Debug.WriteLine($"{count} {data}");
+            Tracer.writeLine($"{count} {data}");
             return data;
         }
 
         public async Task<string> ExecuteCommand(string command, string terminator = ">", CancellationToken cancellation = default(CancellationToken))
         {
-            Debug.WriteLine($"ExecuteCommand: {command}");
+            Tracer.writeLine($"ExecuteCommand: {command}");
 
             await WriteAsync(command, cancellation);
             var response = await listenForResponse(terminator, cancellation);
 
-            Debug.WriteLine($"ExecuteCommand out: {response}");
+            Tracer.writeLine($"ExecuteCommand out: {response}");
 
             return response;
         }
 
         private async Task<string> listenForResponse(string terminator, CancellationToken cancellation = default(CancellationToken))
         {
-            Debug.WriteLine("listenForResponse in");
+            Tracer.writeLine("listenForResponse in");
 
             var response = "";
 
             while (true)
             {
-                Debug.WriteLine("Waiting for more data");
+                Tracer.writeLine("Waiting for more data");
                 var r = await ReadAsync(cancellation);
-                Debug.WriteLine($"listenForResponse: Read: {r}");
+                Tracer.writeLine($"listenForResponse: Read: {r}");
 
                 r = r.Replace("SEARCHING...", "").Replace("\r\n", " ").Replace("\r", " ");
 
@@ -120,7 +121,7 @@ namespace Carputer.Phone.UWP.OBDII
                 if (r.EndsWith(terminator)) break;
             }
 
-            Debug.WriteLine("listenForResponse out: " + response);
+            Tracer.writeLine("listenForResponse out: " + response);
 
             return response;
         }
