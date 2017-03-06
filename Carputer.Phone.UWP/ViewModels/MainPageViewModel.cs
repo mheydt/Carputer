@@ -11,10 +11,18 @@ using System.Threading.Tasks;
 
 namespace Carputer.ViewModels
 {
-    [ImplementPropertyChanged]
+    //[ImplementPropertyChanged]
     public class MainPageViewModel : ReactiveObject,  IObserver<OBDIIUpdate>
     {
-        public double RPM { get; set; }
+        private double _rpm;
+        public double RPM
+        {
+            get { return _rpm; }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _rpm, value);
+            }
+        }
         public ObservableCollection<string> Traces { get; set; } = new ObservableCollection<string>();
 
         private IOBDIIService _obd2service;
@@ -36,9 +44,9 @@ namespace Carputer.ViewModels
 
         public void OnNext(OBDIIUpdate update)
         {
-            if (update.Properties.ContainsKey("RPM"))
+            if (update.Properties.ContainsKey("rpm"))
             {
-                var rpmAsString = update.Properties["RPM"];
+                var rpmAsString = update.Properties["rpm"];
                 var rpm = 0.0;
                 if (double.TryParse(rpmAsString, out rpm))
                 {

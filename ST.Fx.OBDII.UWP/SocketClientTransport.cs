@@ -54,21 +54,24 @@ namespace ST.Fx.OBDII
 
         public async Task ShutdownAsync(CancellationToken cancellation = default(CancellationToken))
         {
-            _writer?.Dispose();
-            _reader?.Dispose();
-            _istream?.Dispose();
-            _ostream?.Dispose();
-            _socket?.Dispose();
+            if (_connected)
+            {
+                _writer?.Dispose();
+                _reader?.Dispose();
+                _istream?.Dispose();
+                _ostream?.Dispose();
+                _socket?.Dispose();
 
-            _writer = null;
-            _reader = null;
-            _istream = null;
-            _ostream = null;
-            _socket = null;
+                _writer = null;
+                _reader = null;
+                _istream = null;
+                _ostream = null;
+                _socket = null;
 
-            _connected = false;
+                _connected = false;
 
-            await Task.FromResult(true);
+                await Task.FromResult(true);
+            }
         }
 
         public async Task WriteAsync(string data, CancellationToken cancellation = default(CancellationToken))
@@ -115,7 +118,7 @@ namespace ST.Fx.OBDII
 
                 r = r.Replace("SEARCHING...", "").Replace("\r\n", " ").Replace("\r", " ");
 
-                response = response + r;
+                response = response + " " + r;
                 response = response.Trim();
 
                 if (r.EndsWith(terminator)) break;

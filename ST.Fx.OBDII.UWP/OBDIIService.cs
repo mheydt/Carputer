@@ -37,7 +37,7 @@ namespace ST.Fx.OBDII
         const string _defaultValue = "-255";
         private Dictionary<string, string> _pids;
         private bool _simulatorMode = false;
-        private int _pollInterval = 5000;
+        private int _pollInterval = 100;
         private object _lock = new object();
         private Task _connectTask = null;
         private int _connectionAttemptInterval = 5000;
@@ -68,9 +68,6 @@ namespace ST.Fx.OBDII
 
             _cts = new CancellationTokenSource();
 
-            await _transport.InitAsync(_cts.Token);
-            await _server.InitAsync(_cts.Token);
-
             _processTask = Task.Run(() => startPollingDevice(_cts.Token));
 
             Tracer.writeLine("init out");
@@ -96,30 +93,51 @@ namespace ST.Fx.OBDII
 
         private async Task startPollingDevice(CancellationToken token)
         {
-            await initializeDeviceAsync(token);
-            await pollDeviceAsync(token);
+            while (!_cts.IsCancellationRequested)
+            {
+                await _transport.InitAsync(_cts.Token);
+                await _server.InitAsync(_cts.Token);
+
+                try
+                {
+                    await initializeDeviceAsync(token);
+                }
+                catch (Exception ex)
+                {
+                    await _transport.ShutdownAsync();
+                    await _server.ShutdownAsync();
+                    continue;
+                }
+
+                await pollDeviceAsync(token);
+            }
         }
 
-        private async Task initializeDeviceAsync(CancellationToken token)
+        private async Task<bool> initializeDeviceAsync(CancellationToken token)
         { 
             Tracer.writeLine("Initializing OBD-II");
 
             try
             {
                 await _transport.ExecuteCommand("ATZ");
+                await Task.Delay(100000);
                 await _transport.ExecuteCommand("ATE0");
                 await _transport.ExecuteCommand("ATL1");
                 await _transport.ExecuteCommand("ATSP00");
             }
             catch (Exception ex)
             {
-
+                return false;
             }
+
+            // need to handle "UNABLE TO CONNECT"
 
             var vin = await getVIN();
             _state["vin"] = vin;
 
             Tracer.writeLine($"Vin=={vin}");
+
+            return true;
         }
 
         private async Task pollDeviceAsync(CancellationToken token)
@@ -154,9 +172,11 @@ namespace ST.Fx.OBDII
                         }
                     }
 
+                    notify();
+
                     if (!token.IsCancellationRequested)
                     {
-                        Task.Delay(_pollInterval, token).Wait(token);
+                        //Task.Delay(_pollInterval, token).Wait(token);
                     }
                 }
             }

@@ -31,40 +31,47 @@ namespace ST.Fx.OBDII
             DeviceInformation device = null;
             foreach (var info in deviceInfoCollection)
             {
-                if (info.Name.ToLower().Contains("obd"))
+                //if (info.Name.ToLower().Contains("obd"))
                 {
                     device = info;
                 }
             }
             if (device == null) return false;
 
-            _service = await RfcommDeviceService.FromIdAsync(device.Id);
-
-            // Disposing the socket with close it and release all resources associated with the socket
-            _socket?.Dispose();
-
-            _socket = new StreamSocket();
             try
             {
-                // Note: If either parameter is null or empty, the call will throw an exception
-                await _socket.ConnectAsync(_service.ConnectionHostName, _service.ConnectionServiceName);
-                _connected = true;
+                _service = await RfcommDeviceService.FromIdAsync(device.Id);
+
+                // Disposing the socket with close it and release all resources associated with the socket
+                _socket?.Dispose();
+
+                _socket = new StreamSocket();
+                try
+                {
+                    // Note: If either parameter is null or empty, the call will throw an exception
+                    await _socket.ConnectAsync(_service.ConnectionHostName, _service.ConnectionServiceName);
+                    _connected = true;
+                }
+                catch (Exception ex)
+                {
+                    _connected = false;
+                    Tracer.writeLine("Connect:" + ex.Message);
+                    return false;
+                }
+
+                // If the connection was successful, the RemoteAddress field will be populated
+                if (_connected)
+                {
+                    var msg = String.Format("Connected to {0}!", _socket.Information.RemoteAddress.DisplayName);
+                    Tracer.writeLine(msg);
+
+                    _dataWriterObject = new DataWriter(_socket.OutputStream);
+                    _dataReaderObject = new DataReader(_socket.InputStream);
+                }
             }
             catch (Exception ex)
             {
-                _connected = false;
-                Tracer.writeLine("Connect:" + ex.Message);
-                return false;
-            }
 
-            // If the connection was successful, the RemoteAddress field will be populated
-            if (_connected)
-            {
-                var msg = String.Format("Connected to {0}!", _socket.Information.RemoteAddress.DisplayName);
-                Tracer.writeLine(msg);
-
-                _dataWriterObject = new DataWriter(_socket.OutputStream);
-                _dataReaderObject = new DataReader(_socket.InputStream);
             }
 
             return true;
@@ -120,7 +127,7 @@ namespace ST.Fx.OBDII
 
                 r = r.Replace("SEARCHING...", "").Replace("\r\n", " ").Replace("\r", " ");
 
-                response = response + r;
+                response = response + " " + r;
                 response = response.Trim();
 
                 if (r.EndsWith(terminator)) break;
@@ -133,8 +140,9 @@ namespace ST.Fx.OBDII
 
         private async Task WriteAsync(string msg, CancellationToken cancellation = default(CancellationToken))
         {
+            var msg2 = msg + "\r";
             // Load the text from the sendText input text box to the dataWriter object
-            _dataWriterObject.WriteString(msg);
+            _dataWriterObject.WriteString(msg2);
 
             // Launch an async task to complete the write operation
             var bytesWritten = await _dataWriterObject.StoreAsync().AsTask(cancellation);
@@ -155,6 +163,7 @@ namespace ST.Fx.OBDII
                 var tmp = await ReadAsyncRaw(cancellation);
                 ret = ret + tmp;
             }
+            Tracer.writeLine("ReadAsync: " + ret);
             return ret;
         }
 
@@ -169,9 +178,11 @@ namespace ST.Fx.OBDII
             var bytesRead = await _dataReaderObject.LoadAsync(readBufferLength).AsTask(cancellation);
             if (bytesRead > 0)
             {
+                Tracer.writeLine($"Bytes read: {bytesRead}");
                 try
                 {
-                    var recvdtxt = _dataReaderObject.ReadString(bytesRead);
+                    var bytes = _dataReaderObject. .ReadBytes(bytesRead); // ReadString(bytesRead);
+                    var recvdtxt = Encoding.ASCII.GetString(bytes);
                     Tracer.writeLine(recvdtxt);
                     return recvdtxt;
                 }

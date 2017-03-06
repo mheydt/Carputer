@@ -131,10 +131,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Carputer.Core\Carputer.Core.csproj">
-      <Project>{9C2F659D-6FEF-4101-887E-0DE598B7484E}</Project>
-      <Name>Carputer.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Carputer.Services\Carputer.Services.csproj">
       <Project>{DB60687E-6104-483E-804F-3BC83AABCE80}</Project>
       <Name>Carputer.Services</Name>
