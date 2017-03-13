@@ -1,10 +1,15 @@
-﻿using System;
+﻿using Carputer.Services;
+using ST.Fx.OBDII;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using TinyIoC;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Devices.Bluetooth.Rfcomm;
+using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -37,7 +42,7 @@ namespace Carputer.Phone.UWP
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected async override void OnLaunched(LaunchActivatedEventArgs e)
         {
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
@@ -51,6 +56,34 @@ namespace Carputer.Phone.UWP
             // just ensure that the window is active
             if (rootFrame == null)
             {
+                /*
+                var deviceInfoCollection = await DeviceInformation.FindAllAsync(RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort));
+                var numDevices = deviceInfoCollection.Count();
+                DeviceInformation device = null;
+                foreach (var info in deviceInfoCollection)
+                {
+                    //if (info.Name.ToLower().Contains("obd"))
+                    {
+                        device = info;
+                    }
+                }
+                //if (device == null) return false;
+
+                //try
+                //{
+                var _service = await RfcommDeviceService.FromIdAsync(device.Id);
+                    //}
+                    */
+                TinyIoCContainer.Current.Register<IAppServices, AppServices>().AsSingleton();
+                TinyIoCContainer.Current.Register<IOBDIIService, OBDIIService>().AsSingleton();
+                TinyIoCContainer.Current.Register<IOBDIIDataProcessor, OBDIIDataProcessor>().AsSingleton();
+                //TinyIoCContainer.Current.Register<IOBDIITransport, SocketClientTransport>().AsSingleton();
+                TinyIoCContainer.Current.Register<IOBDIITransport, BluetoothClient>().AsSingleton();
+                TinyIoCContainer.Current.Register<IOBDIIServer, NullOBDIIServer>().AsSingleton();
+
+                var services = TinyIoCContainer.Current.Resolve<IAppServices>();
+                await services.InitializeAsync();
+
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
 

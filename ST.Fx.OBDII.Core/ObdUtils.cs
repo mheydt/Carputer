@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ST.Fx.OBDII.Core
+namespace ST.Fx.OBDII
 {
     public class ObdUtils
     {
@@ -119,61 +119,34 @@ namespace ST.Fx.OBDII.Core
             }
         }
 
-        public static string ParseLongVIN(string result) //VIN
+        public static string ParseLongVIN(string data) //VIN
         {
-            Tracer.writeLine("ParseLongVin: " + result);
-            if (result.Contains("STOPPED"))
-                return result;
-            if (result.Contains("NO DATA") || result.Contains("ERROR"))
-                return result;
-            var items = result.Replace("\r\n", "").Split(' ');
+            Tracer.writeLine("ParseLongVin: " + data);
+            if (data.Contains("STOPPED"))                return data;
+            if (data.Contains("NO DATA") || data.Contains("ERROR"))                return data;
+            var items = data.Replace("\r\n", "").Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries );
 
             if (items[0] == "0902")
             {
                 items = items.Skip(1).ToArray();
             }
 
-            if (items.Length < 36)
-                return "ERROR";
-            if (items[0].Trim() != "49")
-                return "ERROR";
-            var ret = "";
-            int tint;
-            char tchar;
+            if (items.Length < 35) return "ERROR";
+            if (items[0].Trim() != "49") return "ERROR";
+
             switch (items[1])
             {
                 case "02": //VIN
-                    tint = int.Parse(items[6], NumberStyles.HexNumber);
-                    tchar = (char)tint;
-                    ret += tchar.ToString();
-                    for (int i = 10; i < 14; i++)
+                    var parts = new List<string[]>();
+                    for (var i = 0; i<35; i+=7)
                     {
-                        tint = int.Parse(items[i], NumberStyles.HexNumber);
-                        tchar = (char)tint;
-                        ret += tchar.ToString();
+                        var subitems = items.Skip(i * 7 + 3).Take(4).ToArray();
+                        parts.Add(subitems);
                     }
-                    for (int i = 17; i < 21; i++)
-                    {
-                        tint = int.Parse(items[i], NumberStyles.HexNumber);
-                        tchar = (char)tint;
-                        ret += tchar.ToString();
-                    }
-                    for (int i = 24; i < 28; i++)
-                    {
-                        tint = int.Parse(items[i], NumberStyles.HexNumber);
-                        tchar = (char)tint;
-                        ret += tchar.ToString();
-                    }
-                    for (int i = 31; i < 35; i++)
-                    {
-                        tint = int.Parse(items[i], NumberStyles.HexNumber);
-                        tchar = (char)tint;
-                        ret += tchar.ToString();
-                    }
-                    //mask last 7 digits
-                    ret = ret.Substring(0, 10);
-                    ret += "0000000";
-                    return ret;
+                    var ret = parts.SelectMany(p => p).ToArray();
+                    var result = string.Join(" ", parts);
+                    return result;
+                    break;
             }
             return "ERROR";
         }

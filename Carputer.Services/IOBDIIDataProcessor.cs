@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ST.Fx.OBDII
+namespace Carputer.Services
 {
-    public interface IOBDIIService
+    public interface IOBDIIDataProcessor
     {
-        Task InitAsync();
-        Task ShutdownAsync();
+        Task InitializeAsync();
     }
 }
