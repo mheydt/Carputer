@@ -8,22 +8,25 @@
     xmlns:cm="using:Caliburn.Micro"
     mc:Ignorable="d">
 
-    <Page.Resources>
-        <SolidColorBrush x:Key="AccentBrush" Color="#dd333333" />
-    </Page.Resources>
-
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Image Source="/Images/milky_way.jpg" Opacity="0.5" Stretch="UniformToFill"></Image>
         <SplitView x:Name="NavigationView" DisplayMode="Overlay" OpenPaneLength="150">
+
             <SplitView.Pane>
-                <StackPanel Background="{ThemeResource AccentBrush}">
-                    <Button x:Name="GoBack" Content="Back" Margin="24" />
+                <StackPanel>
+                    <Button x:Name="GoBack" Content="Back" Margin="24" cm:Message.Attach="[Event Click] = [Action GoBack($dataContext)]" />
                 </StackPanel>
             </SplitView.Pane>
             <SplitView.Content>
                 <Grid>
-                    <Frame cm:Message.Attach="[Event Loaded] = [SetupNavigationService($source)]" DataContext="{x:Null}" />
-                    <Button Click="OpenNavigationView" Content="&#xE700;" FontFamily="{ThemeResource SymbolThemeFontFamily}" VerticalAlignment="Top" Margin="24" />
+                    <ContentControl x:Name="ActiveItem" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" >
+                        <ContentControl.Transitions>
+                            <TransitionCollection>
+                                <ContentThemeTransition HorizontalOffset="40"/>
+                            </TransitionCollection>
+                        </ContentControl.Transitions>
+
+                    </ContentControl>
+                    <Button Click="Button_Click" Content="&#xE700;" FontFamily="{ThemeResource SymbolThemeFontFamily}" VerticalAlignment="Top" Margin="24" />
                 </Grid>
             </SplitView.Content>
         </SplitView>

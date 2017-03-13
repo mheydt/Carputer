@@ -15,6 +15,7 @@ namespace Carputer.UWP.ViewModels
     public class MainMenuViewModel : Screen
     {
         private INavigationService _navigationService;
+        private IEventAggregator _eventAggregator;
 
         public string StartViewModelName { get; set; }
 
@@ -31,7 +32,8 @@ namespace Carputer.UWP.ViewModels
                 switch (_selectedItem.NavDestination)
                 {
                     case "NavigationPage":
-                        _navigationService.For<MapViewModel>().Navigate();
+                        //_navigationService.For<MapViewModel>().Navigate();
+                        _eventAggregator.PublishOnUIThread(new Messages.ActivateViewModelMessage<MapViewModel>());
                         break;
 
                     case "AutoPage":
@@ -41,9 +43,10 @@ namespace Carputer.UWP.ViewModels
             }
         }
 
-        public MainMenuViewModel(INavigationService navigationService)
+        public MainMenuViewModel(INavigationService navigationService, IEventAggregator eventAggregator)
         {
             _navigationService = navigationService;
+            _eventAggregator = eventAggregator;
 
             MainMenuItems = new ObservableCollection<MainMenuItemViewModel>()
             {

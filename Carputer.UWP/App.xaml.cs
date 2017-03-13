@@ -73,8 +73,9 @@ namespace Carputer.UWP
             // this means we're not creating a root frame and just directly
             // inserting ShellView as the Window.Content
 
+            //DisplayRootViewFor<ShellViewModel>();
             DisplayRootViewFor<ShellViewModel>();
-
+            //DisplayRootViewFor<MapViewModel>();
             // It's kinda of weird having to use the event aggregator to pass 
             // a value to ShellViewModel, could be an argument for allowing
             // parameters or launch arguments

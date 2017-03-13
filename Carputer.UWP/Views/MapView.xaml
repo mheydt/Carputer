@@ -29,5 +29,21 @@
             <TextBlock Text="{Binding Direction}"></TextBlock>
             <TextBlock Text="{Binding ZoomLevel}"></TextBlock>
         </StackPanel>
+<!--
+        <SplitView x:Name="NavigationView" DisplayMode="Overlay" OpenPaneLength="150">
+
+            <SplitView.Pane>
+                <StackPanel Background="{ThemeResource AccentBrush}">
+                    <Button x:Name="GoBack" Content="Back" Margin="24" />
+                </StackPanel>
+            </SplitView.Pane>
+            <SplitView.Content>
+                <Grid>
+                    <Frame DataContext="{x:Null}" />
+                    <Button Click="OpenNavigationView" Content="&#xE700;" FontFamily="{ThemeResource SymbolThemeFontFamily}" VerticalAlignment="Top" Margin="24" />
+                </Grid>
+            </SplitView.Content>
+        </SplitView>
+        -->
     </Grid>
 </Page>

@@ -103,18 +103,6 @@
       <HintPath>..\packages\PropertyChanged.Fody.1.52.1\lib\portable-net4+sl4+wp8+win8+wpa81+MonoAndroid16+MonoTouch40\PropertyChanged.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Syncfusion.Data.Portable">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\14.4.0.15\Xamarin\lib\pcl\Syncfusion.Data.Portable.dll</HintPath>
-    </Reference>
-    <Reference Include="Syncfusion.DataSource.Portable">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\14.4.0.15\Xamarin\lib\pcl\Syncfusion.DataSource.Portable.dll</HintPath>
-    </Reference>
-    <Reference Include="Syncfusion.GridCommon.Portable">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\14.4.0.15\Xamarin\lib\pcl\Syncfusion.GridCommon.Portable.dll</HintPath>
-    </Reference>
-    <Reference Include="Syncfusion.SfListView.XForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\14.4.0.15\Xamarin\lib\pcl\Syncfusion.SfListView.XForms.dll</HintPath>
-    </Reference>
     <Reference Include="System.Reactive.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Reactive.Core.3.1.1\lib\netstandard1.0\System.Reactive.Core.dll</HintPath>
     </Reference>

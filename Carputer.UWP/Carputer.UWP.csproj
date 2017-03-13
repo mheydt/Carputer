@@ -118,6 +118,7 @@
     <Compile Include="Util\Serilog\Udp\LoggerSinkConfigurationExtensions.cs" />
     <Compile Include="Util\Serilog\Udp\UdpClientWrapper.cs" />
     <Compile Include="Util\Serilog\Udp\UdpSink.cs" />
+    <Compile Include="Messages\ActivateViewModelMessage.cs" />
     <Compile Include="ViewModels\AutoViewModel.cs" />
     <Compile Include="ViewModels\MainMenuItemViewModel.cs" />
     <Compile Include="ViewModels\MainMenuViewModel.cs" />
@@ -189,11 +190,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Core\" />
-  </ItemGroup>
-  <ItemGroup>
-    <SDKReference Include="Syncfusion Controls for UWP XAML, Version=14.4.0.15">
-      <Name>Syncfusion Controls for UWP XAML</Name>
-    </SDKReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
