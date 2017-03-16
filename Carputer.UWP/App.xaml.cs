@@ -51,7 +51,9 @@ namespace Carputer.UWP
             _container.Singleton<IBootstrapService, BootstrapService>()
                 .Singleton<ISettingsService, SettingsService>()
                 .Singleton<IGPSService, GPSService>()
-                .Singleton<ICacheService, CacheService>();
+                .Singleton<ICacheService, CacheService>()
+                .Singleton<IPowerShutdownMonitorService, PowerShutdownMonitorService>()
+                .Singleton<IContinuousSpeechRecognizer, ContinuousSpeechRecognizer>();
 
             _eventAggregator = _container.GetInstance<IEventAggregator>();
 

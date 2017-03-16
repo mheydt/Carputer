@@ -181,10 +181,10 @@ namespace ST.Fx.OBDII
                 Tracer.writeLine($"Bytes read: {bytesRead}");
                 try
                 {
-                    var bytes = _dataReaderObject. .ReadBytes(bytesRead); // ReadString(bytesRead);
-                    var recvdtxt = Encoding.ASCII.GetString(bytes);
-                    Tracer.writeLine(recvdtxt);
-                    return recvdtxt;
+                    //var bytes = _dataReaderObject.ReadBytes(bytesRead); // ReadString(bytesRead);
+                    //var recvdtxt = Encoding.ASCII.GetString(bytes);
+                    //Tracer.writeLine(recvdtxt);
+                    //return recvdtxt;
                 }
                 catch (Exception ex)
                 {

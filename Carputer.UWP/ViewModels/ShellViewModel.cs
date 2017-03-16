@@ -59,6 +59,7 @@ namespace Carputer.UWP.ViewModels
 
         public async Task SetupNavigationService(Frame frame)
         {
+            /*
             if (_container.HasHandler(typeof(INavigationService), null))
                 _container.UnregisterHandler(typeof(INavigationService), null);
 
@@ -85,14 +86,13 @@ namespace Carputer.UWP.ViewModels
 
         public void Handle(SuspendStateMessage message)
         {
-            _navigationService.SuspendState();
+            //_navigationService.SuspendState();
         }
 
         public void Handle(ResumeStateMessage message)
         {
             _resume = true;
         }
-
 
         public void GoBack(object context)
         {

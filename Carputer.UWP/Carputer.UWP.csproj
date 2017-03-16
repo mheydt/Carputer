@@ -112,7 +112,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\BootstrapService.cs" />
     <Compile Include="Services\CacheService.cs" />
+    <Compile Include="Services\ContinuousSpeechRecognizer.cs" />
     <Compile Include="Services\GPSService.cs" />
+    <Compile Include="Services\PowerShutdownMonitorService.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Util\Serilog\Udp\IUdpClient.cs" />
     <Compile Include="Util\Serilog\Udp\LoggerSinkConfigurationExtensions.cs" />
@@ -190,6 +192,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Core\" />
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="WindowsIoT, Version=10.0.14393.0">
+      <Name>Windows IoT Extensions for the UWP</Name>
+    </SDKReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
