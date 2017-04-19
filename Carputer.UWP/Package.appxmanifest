@@ -35,6 +35,7 @@ IgnorableNamespaces="uap mp uap3">
     <DeviceCapability Name="proximity" />
     <DeviceCapability Name="location" />
     <DeviceCapability Name="microphone" />
+    <DeviceCapability Name="wifiControl" />
     <DeviceCapability Name="serialcommunication">
       <Device Id="any">
         <Function Type="name:serialPort" />

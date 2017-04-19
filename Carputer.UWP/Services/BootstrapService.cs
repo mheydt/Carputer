@@ -25,6 +25,8 @@ namespace Carputer.UWP.Services
         private IService[] _services;
         private IPowerShutdownMonitorService _powerMonitorService;
         private IContinuousSpeechRecognizer _continousSpeechRecognizer;
+        private IMediaPlayerService _mediaPlayerService;
+        private IDeviceWatcherService _deviceWatcherService;
 
         public BootstrapService(
             IEventAggregator eventAggregator, 
@@ -32,7 +34,9 @@ namespace Carputer.UWP.Services
             ISettingsService settingService, 
             IGPSService gpsService,
             IPowerShutdownMonitorService powerMonitorService,
-            IContinuousSpeechRecognizer continuousSpeechRecognizer)
+            IContinuousSpeechRecognizer continuousSpeechRecognizer,
+            IMediaPlayerService mediaPlayerService,
+            IDeviceWatcherService deviceWatcherService)
         {
             _eventAggregator = eventAggregator;
             _settingsService = settingService;
@@ -40,6 +44,8 @@ namespace Carputer.UWP.Services
             _cacheService = cacheService;
             _powerMonitorService = powerMonitorService;
             _continousSpeechRecognizer = continuousSpeechRecognizer;
+            _mediaPlayerService = mediaPlayerService;
+            _deviceWatcherService = deviceWatcherService;
 
             _powerMonitorService.DoShutdown += async (s, e) =>
             {
@@ -66,6 +72,8 @@ namespace Carputer.UWP.Services
             (_gpsService as IService).StartAsync();
             (_powerMonitorService as IService).StartAsync();
             (_continousSpeechRecognizer as IService).StartAsync();
+            (_mediaPlayerService as IService).StartAsync();
+            (_deviceWatcherService as IService).StartAsync();
             //var tasks = _services.Select(s => s.StartAsync());
             //await Task.WhenAll(tasks);
 
@@ -74,6 +82,8 @@ namespace Carputer.UWP.Services
 
         public async Task ShutdownAsync()
         {
+            await (_deviceWatcherService as IService).StopAsync();
+            await (_mediaPlayerService as IService).StopAsync();
             await (_powerMonitorService as IService).StopAsync();
             await (_gpsService as IService).StopAsync();
             await (_settingsService as IService).StopAsync();

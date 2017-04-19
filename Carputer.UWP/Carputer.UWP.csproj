@@ -113,7 +113,9 @@
     <Compile Include="Services\BootstrapService.cs" />
     <Compile Include="Services\CacheService.cs" />
     <Compile Include="Services\ContinuousSpeechRecognizer.cs" />
+    <Compile Include="Services\DeviceWatcherService.cs" />
     <Compile Include="Services\GPSService.cs" />
+    <Compile Include="Services\MediaPlayerService.cs" />
     <Compile Include="Services\PowerShutdownMonitorService.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Util\Serilog\Udp\IUdpClient.cs" />
@@ -125,7 +127,9 @@
     <Compile Include="ViewModels\MainMenuItemViewModel.cs" />
     <Compile Include="ViewModels\MainMenuViewModel.cs" />
     <Compile Include="ViewModels\MapViewModel.cs" />
+    <Compile Include="ViewModels\MusicPlayerViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="ViewModels\WifiViewModel.cs" />
     <Compile Include="Views\AutoView.xaml.cs">
       <DependentUpon>AutoView.xaml</DependentUpon>
     </Compile>
@@ -135,9 +139,16 @@
     <Compile Include="Views\MapView.xaml.cs">
       <DependentUpon>MapView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\MusicPlayerView.xaml.cs">
+      <DependentUpon>MusicPlayerView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\WifiView.xaml.cs">
+      <DependentUpon>WifiView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\WifiNetworkItemViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -146,6 +157,16 @@
     <None Include="Carputer.UWP_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\wifi\open_1bar.png" />
+    <Content Include="Assets\wifi\open_2bar.png" />
+    <Content Include="Assets\wifi\open_3bar.png" />
+    <Content Include="Assets\wifi\open_4bar.png" />
+    <Content Include="Assets\wifi\open_5bar.png" />
+    <Content Include="Assets\wifi\secure_1bar.png" />
+    <Content Include="Assets\wifi\secure_2bar.png" />
+    <Content Include="Assets\wifi\secure_3bar.png" />
+    <Content Include="Assets\wifi\secure_4bar.png" />
+    <Content Include="Assets\wifi\secure_5bar.png" />
     <Content Include="FodyWeavers.xml" />
     <Content Include="Images\auto.png" />
     <Content Include="Images\local.png" />
@@ -155,6 +176,9 @@
     <Content Include="Images\Navigation.jpg" />
     <Content Include="Images\splash.png" />
     <Content Include="Images\video.png" />
+    <Content Include="Media\Music\07 Emotion Detector.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -185,7 +209,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\MusicPlayerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ShellView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WifiView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -46,14 +46,18 @@ namespace Carputer.UWP
                 .PerRequest<ShellViewModel>()
                 .PerRequest<MainMenuViewModel>()
                 .PerRequest<MapViewModel>(nameof(MapViewModel))
-                .PerRequest<AutoViewModel>(nameof(AutoViewModel));
+                .PerRequest<AutoViewModel>(nameof(AutoViewModel))
+                .PerRequest<MusicPlayerViewModel>(nameof(MusicPlayerViewModel))
+                .PerRequest<WifiViewModel>(nameof(WifiViewModel));
 
             _container.Singleton<IBootstrapService, BootstrapService>()
                 .Singleton<ISettingsService, SettingsService>()
                 .Singleton<IGPSService, GPSService>()
                 .Singleton<ICacheService, CacheService>()
                 .Singleton<IPowerShutdownMonitorService, PowerShutdownMonitorService>()
-                .Singleton<IContinuousSpeechRecognizer, ContinuousSpeechRecognizer>();
+                .Singleton<IContinuousSpeechRecognizer, ContinuousSpeechRecognizer>()
+                .Singleton<IMediaPlayerService, MediaPlayerService>()
+                .Singleton<IDeviceWatcherService, DeviceWatcherService>();
 
             _eventAggregator = _container.GetInstance<IEventAggregator>();
 
@@ -76,8 +80,12 @@ namespace Carputer.UWP
             // inserting ShellView as the Window.Content
 
             //DisplayRootViewFor<ShellViewModel>();
-            DisplayRootViewFor<ShellViewModel>();
+            //DisplayRootViewFor<ShellViewModel>();
             //DisplayRootViewFor<MapViewModel>();
+
+            DisplayRootViewFor<WifiViewModel>();
+
+
             // It's kinda of weird having to use the event aggregator to pass 
             // a value to ShellViewModel, could be an argument for allowing
             // parameters or launch arguments

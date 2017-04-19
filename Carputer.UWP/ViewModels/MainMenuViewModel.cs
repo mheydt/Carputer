@@ -36,8 +36,14 @@ namespace Carputer.UWP.ViewModels
                         _eventAggregator.PublishOnUIThread(new Messages.ActivateViewModelMessage<MapViewModel>());
                         break;
 
+                    case "MusicPage":
+                        _eventAggregator.PublishOnUIThread(new Messages.ActivateViewModelMessage<MusicPlayerViewModel>());
+                        break;
+
                     case "AutoPage":
-                        _navigationService.For<AutoViewModel>().Navigate();
+                        //_navigationService.For<AutoViewModel>().Navigate();
+                        _eventAggregator.PublishOnUIThread(new Messages.ActivateViewModelMessage<AutoViewModel>());
+
                         break;
                 }
             }
